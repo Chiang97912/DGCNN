@@ -10,6 +10,7 @@ import re
 import json
 from collections import defaultdict
 
+
 def get_max_length(filename):
     max_question_len = 0
     max_evidence_len = 0
@@ -20,7 +21,7 @@ def get_max_length(filename):
             evi_len = len(data['evidence_tokens'])
             if que_len > max_question_len:
                 max_question_len = que_len
-            
+
             if evi_len > max_evidence_len:
                 max_evidence_len = evi_len
     if max_evidence_len > max_question_len:
@@ -28,11 +29,12 @@ def get_max_length(filename):
     else:
         return max_question_len
 
+
 def load_embedding(filename):
     embeddings = []
     word2idx = defaultdict(list)
-    print("开始加载词向量")
-    with open(filename,mode='r',encoding='utf-8') as f:
+    print("Start loading word embedding")
+    with open(filename, mode='r', encoding='utf-8') as f:
         for line in f:
             arr = line.split(" ")
             embedding = [float(val) for val in arr[1:len(arr)]]
@@ -41,14 +43,15 @@ def load_embedding(filename):
 
     embedding_size = len(arr) - 1
     word2idx["UNKNOWN"] = len(word2idx)
-    embeddings.append([0]*embedding_size)
+    embeddings.append([0] * embedding_size)
 
     word2idx["NUM"] = len(word2idx)
-    embeddings.append([0]*embedding_size)
-    print("词向量加载完毕")
-    return embeddings,word2idx
+    embeddings.append([0] * embedding_size)
+    print("Word embedding loaded")
+    return embeddings, word2idx
 
-def sentence2index(sentence,word2idx,max_len):
+
+def sentence2index(sentence, word2idx, max_len):
     unknown = word2idx.get("UNKNOWN")
     num = word2idx.get("NUM")
     index = [unknown] * max_len
@@ -57,19 +60,20 @@ def sentence2index(sentence,word2idx,max_len):
         if word in word2idx:
             index[i] = word2idx[word]
         else:
-            if re.match("\d+",word):
+            if re.match("\d+", word):
                 index[i] = num
             else:
                 index[i] = unknown
-        if i >= max_len-1:
+        if i >= max_len - 1:
             break
         i += 1
     return index
 
-def load_data(filename,word2idx,max_len):
-    questions,evidences,y1,y2 = [],[],[],[]
-    print("开始解析数据")
-    with open(filename,'r') as f:
+
+def load_data(filename, word2idx, max_len):
+    questions, evidences, y1, y2 = [], [], [], []
+    print("Start parsing data")
+    with open(filename, 'r') as f:
         for line in f:
             data = json.loads(line)
             question = data['question_tokens']
@@ -87,19 +91,20 @@ def load_data(filename,word2idx,max_len):
             evidences.append(evidenceIdx)
             y1.append(as_temp)
             y2.append(ae_temp)
-    print("解析数据完毕")
-    return questions,evidences,y1,y2
+    print("Data analysis completed")
+    return questions, evidences, y1, y2
 
-def next_batch(questions,evidences,y1,y2,batch_size):
+
+def next_batch(questions, evidences, y1, y2, batch_size):
     data_len = len(questions)
-    batch_num = int(data_len/batch_size)
-    
+    batch_num = int(data_len / batch_size)
+
     for batch in range(batch_num):
-        result_questions,result_evidences,result_y1,result_y2 = [],[],[],[]
-        
-        for i in range(batch*batch_size,min((batch+1)*batch_size,data_len)):
+        result_questions, result_evidences, result_y1, result_y2 = [], [], [], []
+
+        for i in range(batch * batch_size, min((batch + 1) * batch_size, data_len)):
             result_questions.append(questions[i])
             result_evidences.append(evidences[i])
             result_y1.append(y1[i])
             result_y2.append(y2[i])
-        yield np.array(result_questions),np.array(result_evidences),np.array(result_y1),np.array(result_y2)
+        yield np.array(result_questions), np.array(result_evidences), np.array(result_y1), np.array(result_y2)
