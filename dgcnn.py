@@ -72,7 +72,6 @@ class DGCNN(object):
         M = X.get_shape().as_list()[1]
         N = X.get_shape().as_list()[2]
         reshaped_x = tf.reshape(X, [-1, N, M])
-        # reshaped_x = tf.transpose(X, [0, 2, 1])
         attention = tf.layers.dense(reshaped_x, M, activation='softmax')
         attention = tf.reshape(attention, [-1, M, N])
         outputs = tf.multiply(X, attention)
