@@ -1,0 +1,16 @@
+{
+    "training_file": "./new_data/training.json",
+    "validation_file": "./new_data/validation.ann.json",
+    "testing_file": "./new_data/test.ann.json",
+    "trained_model": "./checkpoints/model.ckpt",
+    "embedding_file": "D:/DataMining/QASystem/wiki/wiki.zh.text.vector",
+    "embedding_size": 60,  // Word embedding dimension
+    "epochs": 50,  // The number of epochs
+    "batch_size": 64,  // Batch data size
+    "sequence_length": 150,  // Sentence length
+    "learning_rate": 0.01,
+    "lrdown_rate": 0.95,
+    "gpu_mem_usage": 0.75,
+    "gpu_device": "/gpu:0",
+    "cpu_device": "/cpu:0"
+}

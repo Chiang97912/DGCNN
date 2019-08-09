@@ -72,7 +72,7 @@ def sentence2index(sentence, word2idx, max_len):
 
 def load_data(filename, word2idx, max_len):
     questions, evidences, y1, y2 = [], [], [], []
-    print("Start parsing data")
+    print("Start loading data")
     with open(filename, 'r') as f:
         for line in f:
             data = json.loads(line)
@@ -91,13 +91,13 @@ def load_data(filename, word2idx, max_len):
             evidences.append(evidenceIdx)
             y1.append(as_temp)
             y2.append(ae_temp)
-    print("Data analysis completed")
-    return questions, evidences, y1, y2
+    print("Data loaded")
+    return np.array(questions), np.array(evidences), np.array(y1), np.array(y2)
 
 
 def next_batch(questions, evidences, y1, y2, batch_size):
     data_len = len(questions)
-    batch_num = int(data_len / batch_size)
+    batch_num = int(np.ceil(data_len / batch_size))
 
     for batch in range(batch_num):
         result_questions, result_evidences, result_y1, result_y2 = [], [], [], []
