@@ -22,6 +22,7 @@ class DGCNN(object):
         self.y1 = tf.placeholder(tf.int32, [None, None])  # the label of answer start
         self.y2 = tf.placeholder(tf.int32, [None, None])  # the label of answer end
         self.lr = tf.placeholder(tf.float32)  # learning rate
+        self.is_train = tf.placeholder(tf.bool, name='is_train')
 
         self.Q, self.E = self.embedding_layer(self.q, self.e, self.embeddings)
         # self.P = position_embedding(self.e)
@@ -35,7 +36,7 @@ class DGCNN(object):
         self.merged = self.conv1d_block(self.merged, 3, dilation_rate=1, scope='conv1d_block_dilation1')
         self.merged = self.conv1d_block(self.merged, 3, dilation_rate=2, scope='conv1d_block_dilation2')
         self.merged = self.conv1d_block(self.merged, 3, dilation_rate=4, scope='conv1d_block_dilation4')
-        # self.merged = tf.layers.dropout(self.merged, rate=0.3, training=True)
+        # self.merged = tf.layers.dropout(self.merged, rate=0.25, training=self.is_train)
         # self.merged = tf.layers.batch_normalization(self.merged, training=True)
         self.p1, self.p2 = self.output_layer(self.merged)
 
@@ -46,7 +47,9 @@ class DGCNN(object):
     def embedding_layer(self, q, e, embeddings):
         embeddings = tf.constant(embeddings, dtype=tf.float32)
         embed_q = tf.nn.embedding_lookup(embeddings, q)
+        embed_q = tf.layers.dropout(embed_q, rate=0.25, training=self.is_train)
         embed_e = tf.nn.embedding_lookup(embeddings, e)
+        embed_e = tf.layers.dropout(embed_e, rate=0.25, training=self.is_train)
 
         return embed_q, embed_e
 
@@ -56,9 +59,10 @@ class DGCNN(object):
         """
         with tf.variable_scope(scope, reuse=tf.AUTO_REUSE):
             filters = X.get_shape().as_list()[-1]
-            glu = tf.sigmoid(tf.layers.conv1d(X, filters, kernel_size, dilation_rate=dilation_rate, padding=padding,
+            glu = tf.layers.conv1d(X, filters, kernel_size, dilation_rate=dilation_rate, padding=padding,
                                 kernel_initializer=create_kernel_initializer('conv'),
-                                 bias_initializer=create_bias_initializer('conv')))
+                                 bias_initializer=create_bias_initializer('conv'))
+            glu = tf.sigmoid(tf.layers.dropout(glu, rate=0.1, training=self.is_train))
             conv = tf.layers.conv1d(X, filters, kernel_size, dilation_rate=dilation_rate, padding=padding,
                                 kernel_initializer=create_kernel_initializer('conv'),
                                  bias_initializer=create_bias_initializer('conv'))
@@ -69,8 +73,8 @@ class DGCNN(object):
             # mask
             outputs = tf.where(tf.equal(X, 0), X, outputs)
 
-            outputs = tf.layers.dropout(outputs, rate=0.3, training=True)
-            outputs = tf.layers.batch_normalization(outputs, training=True)
+            # outputs = tf.layers.dropout(outputs, rate=0.25, training=self.is_train)
+            # outputs = tf.layers.batch_normalization(outputs, training=True)
             return outputs
 
     def attention_encoder(self, X, hidden_size=128, scope='attention_encoder'):
@@ -94,7 +98,7 @@ class DGCNN(object):
 
             outputs = tf.matmul(attention, X)
 
-            # outputs = tf.layers.dropout(outputs, rate=0.25, training=True)
+            # outputs = tf.layers.dropout(outputs, rate=0.25, training=self.is_train)
             # outputs = tf.layers.batch_normalization(outputs, training=True)
             return outputs
 

@@ -16,10 +16,10 @@ def main():
     training_file = "./new_data/training.json"
     validation_file = "./new_data/validation.ann.json"
     trained_model = "./checkpoints/model.ckpt"
-    # embedding_file = "D:/DataMining/QASystem/wiki/wiki.zh.text.vector"
-    embedding_file = "./wiki.zh.text.vector"
+    embedding_file = "D:/DataMining/QASystem/wiki/wiki.zh.text.vector"
+    # embedding_file = "./wiki.zh.text.vector"
     embedding_size = 60  # Word embedding dimension
-    epochs = 30
+    epochs = 100
     batch_size = 64  # Batch data size
     sequence_length = 150  # Sentence length
     learning_rate = 0.0001
@@ -56,7 +56,8 @@ def main():
                             model.q: batch_questions,
                             model.y1: batch_y1,
                             model.y2: batch_y2,
-                            model.lr: learning_rate
+                            model.lr: learning_rate,
+                            model.is_train: True
                         }
                         _, loss, acc1, acc2 = sess.run([model.train, model.loss, model.acc1, model.acc2], feed_dict)
                         duration = time.time() - start_time
@@ -71,6 +72,7 @@ def main():
                         model.q: questions_vali,
                         model.y1: y1_vali,
                         model.y2: y2_vali,
+                        model.is_train: False
                     }
                     loss, acc1, acc2 = sess.run([model.loss, model.acc1, model.acc2], feed_dict)
                     duration = time.time() - start_time

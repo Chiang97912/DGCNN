@@ -14,8 +14,8 @@ from config import get_config
 def main():
     testing_file = "./new_data/test.ann.json"
     trained_model = "./checkpoints/model.ckpt"
-    # embedding_file = "D:/DataMining/QASystem/wiki/wiki.zh.text.vector"
-    embedding_file = "./wiki.zh.text.vector"
+    embedding_file = "D:/DataMining/QASystem/wiki/wiki.zh.text.vector"
+    # embedding_file = "./wiki.zh.text.vector"
     embedding_size = 60  # Word embedding dimension
     batch_size = 64  # Batch data size
     sequence_length = 150  # Sentence length
@@ -44,6 +44,7 @@ def main():
                         model.q: batch_questions,
                         model.y1: batch_y1,
                         model.y2: batch_y2,
+                        model.is_train: False
                     }
                     acc1_, acc2_ = sess.run([model.acc1, model.acc2], feed_dict)
                     acc1.append(acc1_)
